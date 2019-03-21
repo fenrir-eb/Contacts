@@ -12,44 +12,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContanctHolder> {
 
     private List<Contact> currentContactList;
-    private List<Contact> fullContactList;
 
     public class ContanctHolder extends RecyclerView.ViewHolder {
 
         private ImageView   contactImage;
         private TextView    contactName;
-//        private TextView    contactData;
+        private TextView    contactData;
 
         public ContanctHolder(@NonNull View itemView) {
             super(itemView);
 
-            contactName = itemView.findViewById(R.id.tv_grid_item);
             contactImage = itemView.findViewById(R.id.iv_grid_item);
+            contactName = itemView.findViewById(R.id.tv_grid_item);
+            contactData = itemView.findViewById(R.id.tv_data_grid_item);
         }
     }
 
     public ContactAdapter(){
         currentContactList = new ArrayList<>();
-        fullContactList = new MainViewModel().getContacts().getValue();
     }
 
     public void setData(List<Contact> contacts){
+        ContactDiffUtilCallback callback = new ContactDiffUtilCallback(currentContactList, contacts);
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(callback);
         currentContactList.clear();
         currentContactList.addAll(contacts);
-        notifyDataSetChanged();
-    }
-
-    public List<Contact> getAllContacts(){
-        return this.fullContactList;
-    }
-
-    public void addContact(Contact contact){
-        this.fullContactList.add(contact);
+        result.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -64,6 +58,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.Contanct
         Contact contact = currentContactList.get(position);
         Picasso.get().load(contact.getImgUrl()).into(holder.contactImage);
         holder.contactName.setText(contact.getName());
+        holder.contactData.setText(contact.getData());
     }
 
     @Override
